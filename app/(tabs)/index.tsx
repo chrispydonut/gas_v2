@@ -66,7 +66,7 @@ export default function Home() {
                   <TouchableOpacity
                     key={item.key}
                     className="w-[104px] h-[104px] bg-white rounded-2xl items-center justify-center mx-3 shadow shadow-black/10 elevation-3"
-                    onPress={() => router.push(`/service/${item.key}` as any)}
+                    onPress={() => router.push(item.key === 'center' ? '/contact' : `/service/${item.key}` as any)}
                   >
                     <Image source={item.icon} className="w-12 h-12 mb-2" resizeMode="contain" />
                     <Text className="text-[15px] text-[#222] font-medium text-center">{item.label}</Text>
@@ -94,7 +94,7 @@ export default function Home() {
               <TouchableOpacity
                 key={item.key}
                 className="w-[104px] h-[104px] bg-white rounded-2xl items-center justify-center mx-0 mb-5 shadow shadow-black/10 elevation-3 mr-4"
-                onPress={() => router.push(`/${item.key}` as any)}
+                onPress={() => router.push(item.key === 'center' ? '/contact' : `/service/${item.key}` as any)}
                 style={{ marginLeft: 0, marginRight: 16 }}
               >
                 <Image source={item.icon} className="w-16 h-16 mb-2" resizeMode="contain" />
