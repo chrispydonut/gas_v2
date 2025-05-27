@@ -101,7 +101,7 @@ export default function MyService() {
         {CATEGORIES.map((cat) => (
           <TouchableOpacity
             key={cat}
-            className={`rounded-2xl px-4 py-2 mr-2 h-[30px] ${selected === cat ? 'bg-[#FF5A36]' : 'bg-[#F3F3F3]'}`}
+            className={`rounded-2xl px-4 py-1 flex items-center justify-center mr-2 h-[30px] ${selected === cat ? 'bg-[#FF5A36]' : 'bg-[#F3F3F3]'}`}
             onPress={() => setSelected(cat)}
           >
             <Text className={`text-[15px] font-medium ${selected === cat ? 'text-white' : 'text-[#222]'}`}>

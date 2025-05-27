@@ -15,12 +15,23 @@ export default function ServiceDetail() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   useEffect(() => {
+    const checkSession = async () => {
+      const { data: sessionData, error } = await supabase.auth.getSession();
+      console.log('✅ 세션 user id:', sessionData?.session?.user.id);
+
+      console.log('✅ 삽입할 user_id:', sessionData?.session?.user.id); // insertData.user_id랑 같아야 함
+    };
+  
+    checkSession();
+  }, []);
+
+  useEffect(() => {
     if (!id) return;
 
     const fetchData = async () => {
       const { data: requestData } = await supabase
         .from('service_requests')
-        .select('id, status, created_at, working_at, completed_at, cancled_at, services(name), stores(name, address)')
+        .select('id, status, created_at, working_at, completed_at, canceled_at, services(name), stores(name, address)')
         .eq('id', id)
         .single();
 
@@ -39,28 +50,68 @@ export default function ServiceDetail() {
 
   const handleStatusUpdate = async (newStatus: string, timeField: string) => {
     const now = new Date().toISOString();
-    const updateData: any = { status: newStatus };
-    updateData[timeField] = now;
-
-    const { error } = await supabase
+    const updateData: any = { status: newStatus, [timeField]: now };
+  
+    // 1. 상태 업데이트
+    const { error: updateError } = await supabase
       .from('service_requests')
       .update(updateData)
       .eq('id', request.id);
-
-    if (error) {
-      Toast.show({ type: 'error', text1: `${newStatus} 처리 실패`, text2: error.message });
+  
+    if (updateError) {
+      console.error('Supabase 업데이트 에러:', updateError);
+      Toast.show({ type: 'error', text1: `${newStatus} 처리 실패`, text2: updateError.message });
+      return;
+    }
+  
+    // 2. 세션에서 user_id 가져오기
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    const session = sessionData?.session;
+  
+    if (!session || !session.user) {
+      console.error('❌ 세션 없음: 알림 생성 생략');
     } else {
-      setRequest({ ...request, ...updateData });
-
-      const statusMessage = {
-        진행중: '요청이 수락되었습니다.',
-        완료: '작업이 완료되었습니다.',
-        취소: '요청이 거절되었습니다.',
+      const userId = session.user.id;
+  
+      const insertData = {
+        user_id: userId,
+        type: 'status_update',
+        title: '서비스 상태 변경',
+        description: `서비스가 [${newStatus}] 상태로 변경되었습니다.`,
+        icon_type:
+        newStatus === '진행중' ? 'service' :
+        newStatus === '완료' ? 'complete' :
+        newStatus === '취소' ? 'cancel' :
+        'default',
+        is_read: false,
       };
 
-      Toast.show({ type: 'success', text1: statusMessage[newStatus as keyof typeof statusMessage] || '상태가 업데이트되었습니다.' });
+  
+      const { error: notificationError } = await supabase.from('notifications').insert([insertData]);
+  
+      if (notificationError) {
+        console.error('알림 생성 실패:', notificationError);
+      } else {
+        console.log('✅ 알림 생성 완료');
+      }
     }
+  
+    // 3. 로컬 상태 업데이트
+    setRequest({ ...request, ...updateData });
+  
+    // 4. 성공 알림
+    const statusMessage = {
+      진행중: '요청이 수락되었습니다.',
+      완료: '작업이 완료되었습니다.',
+      취소: '요청이 거절되었습니다.',
+    };
+  
+    Toast.show({
+      type: 'success',
+      text1: statusMessage[newStatus as keyof typeof statusMessage] || '상태가 업데이트되었습니다.',
+    });
   };
+  
 
   
 
@@ -68,22 +119,22 @@ export default function ServiceDetail() {
     '요청됨': {
       bgColor: 'bg-[#EAF5FE]',
       title: '서비스 요청됨',
-      desc: '요청하신 서비스를 확인하고 있습니다.',
+      description: '요청하신 서비스를 확인하고 있습니다.',
     },
     '진행중': {
       bgColor: 'bg-[#FEFBEA]',
       title: '작업 시행 중',
-      desc: '서비스가 현재 진행 중입니다.',
+      description: '서비스가 현재 진행 중입니다.',
     },
     '완료': {
       bgColor: 'bg-[#E6F4EA]',
       title: '서비스 완료',
-      desc: '서비스가 성공적으로 완료되었습니다.',
+      description: '서비스가 성공적으로 완료되었습니다.',
     },
     '취소': {
       bgColor: 'bg-[#FFEAEA]',
       title: '서비스 취소됨',
-      desc: '요청하신 서비스가 취소되었습니다.',
+      description: '요청하신 서비스가 취소되었습니다.',
     },
   };
 
@@ -91,7 +142,7 @@ export default function ServiceDetail() {
     { label: '요청됨', timestamp: request?.created_at },
     { label: '작업 시행 중', timestamp: request?.working_at },
     { label: '서비스 완료', timestamp: request?.completed_at },
-    { label: '취소됨', timestamp: request?.cancled_at },
+    { label: '취소됨', timestamp: request?.canceled_at },
   ];
 
   useEffect(() => {
@@ -138,7 +189,7 @@ export default function ServiceDetail() {
         rawTime = request.completed_at;
         break;
       case '취소':
-        rawTime = request.cancled_at;
+        rawTime = request.canceled_at;
         break;
       default:
         return '';
@@ -168,7 +219,7 @@ export default function ServiceDetail() {
       <View className={`pt-2 px-4 flex-row items-center ${statusConfig.bgColor}`}>
         <View className="flex-1">
           <Text className="text-[#222] font-bold text-[18px] p-3 py-1">{statusConfig.title}</Text>
-          <Text className="text-[#222] text-[12px] p-3">{statusConfig.desc}</Text>
+          <Text className="text-[#222] text-[12px] p-3">{statusConfig.description}</Text>
         </View>
         <Image source={require('../../assets/star.png')} className="w-18 h-18 mt-2" resizeMode="contain" />
       </View>
@@ -308,7 +359,7 @@ export default function ServiceDetail() {
               </TouchableOpacity>
               <TouchableOpacity
                 className="flex-1 ml-2 bg-[#E0E0E0] py-3 rounded-xl items-center"
-                onPress={() => handleStatusUpdate('취소', 'cancled_at')}
+                onPress={() => handleStatusUpdate('취소', 'canceled_at')}
               >
                 <Text className="text-[#222] font-bold text-base">거절하기</Text>
               </TouchableOpacity>
@@ -323,7 +374,7 @@ export default function ServiceDetail() {
               </TouchableOpacity>
               <TouchableOpacity
                 className="flex-1 ml-2 bg-[#E0E0E0] py-3 rounded-xl items-center"
-                onPress={() => handleStatusUpdate('취소', 'cancled_at')}
+                onPress={() => handleStatusUpdate('취소', 'canceled_at')}
               >
                 <Text className="text-[#222] font-bold text-base">취소하기</Text>
               </TouchableOpacity>

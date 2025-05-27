@@ -52,7 +52,7 @@ export default function AdminCenter() {
 
       // 실시간 메시지 리스닝
       const channel = supabase
-        .channel('admin-chat-realtime')
+        .channel(`chat-${conversation_id}`)
         .on(
           'postgres_changes',
           {
