@@ -158,7 +158,7 @@ export default function Login() {
   };
 
   return (
-    <View className="flex-1 justify-center p-6 bg-white">
+    <View className="flex-1 justify-center p-6 bg-white -mt-28">
       {/* <Text className="text-3xl font-bold mb-8 text-center">로그인</Text> */}
       <View className="flex-row items-center justify-center mb-20">
         <Image source={require('../../assets/logo.png')} className="w-[172.8px] h-[104.6px]" />
@@ -166,13 +166,14 @@ export default function Login() {
 
       {/* 전화번호/이메일 입력창 */}
       <TextInput
-        className="border border-gray-300 rounded-lg px-4 mb-4 text-base"
+        className="border border-gray-300 rounded-lg px-4 mb-2 text-base"
         style={{ height: 44, paddingVertical: 8, lineHeight: 20 }}
         placeholder="전화번호 (예: 01012345678)"
         placeholderTextColor="#999"
         value={phoneOrEmail}
         onChangeText={handleInputChange}
-        keyboardType={isAdminFlow ? "default" : "phone-pad"}
+        // keyboardType={isAdminFlow ? "default" : "phone-pad"}
+        keyboardType="default"
         editable={!loading}
         autoCapitalize="none"
       />

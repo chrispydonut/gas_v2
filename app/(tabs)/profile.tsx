@@ -69,6 +69,7 @@ export default function Profile() {
 
   // 로그아웃 (placeholder)
   const handleLogout = () => {
+    supabase.auth.signOut();
     router.replace('/authentication/login');
   };
 

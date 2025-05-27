@@ -1,7 +1,53 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
+import { supabase } from '../../lib/supabase';
+import { ActivityIndicator, View } from 'react-native';
+import { Redirect } from 'expo-router';
 
 export default function TabLayout() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasUser, setHasUser] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData.session) {
+          setHasUser(false);
+          setIsLoading(false);
+          return;
+        }
+  
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError || !userData.user) {
+          console.error('User 확인 실패:', userError?.message);
+          setHasUser(false);
+        } else {
+          setHasUser(true);
+        }
+      } catch (err) {
+        console.error('예외 발생:', err);
+        setHasUser(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    checkUser();
+  }, []);
+
+  if (isLoading || hasUser === null) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#EB5A36" />
+      </View>
+    );
+  }
+
+  if (!hasUser) {
+    return <Redirect href="/authentication/login" />;
+  }
   return (
     <Tabs
       screenOptions={{

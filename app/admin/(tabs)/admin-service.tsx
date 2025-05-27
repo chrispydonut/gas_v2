@@ -92,9 +92,12 @@ export default function MyService() {
 
   return (
     <View className="flex-1 bg-white">
-      <View className="pt-20 px-5 mb-3 items-center justify-center">
-        <Text className="text-[22px] font-bold text-[#222]">서비스 관리</Text>
+      <View className="pt-20 px-5 mb-3 items-center justify-between flex-row">
         <View className="w-[28px]" />
+        <Text className="text-[22px] font-bold text-[#222]">서비스 관리</Text>
+        <TouchableOpacity onPress={() => router.replace('/authentication/login')}>
+          <Ionicons name="log-out-outline" size={28} color="#222" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView
