@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ActivityIndicator, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,6 +9,7 @@ export default function ServiceDetail() {
   const { id } = useLocalSearchParams();
   const [request, setRequest] = useState<any>(null);
   const [details, setDetails] = useState<any[]>([]);
+  const [store, setStore] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -19,14 +19,29 @@ export default function ServiceDetail() {
     const fetchData = async () => {
       const { data: requestData } = await supabase
         .from('service_requests')
-        .select('id, status, created_at, working_at, completed_at, cancled_at, services(name), stores(name, address)')
+        //.select('id, status, created_at, working_at, completed_at, cancled_at')
+        .select("*")
         .eq('id', id)
         .single();
+      
+      console.log("data", requestData);
 
       const { data: detailData } = await supabase
         .from('request_details')
         .select('key, value')
         .eq('request_id', id);
+
+      if (requestData?.store_id) {
+        const { data: storeData } = await supabase
+          .from('stores')
+          .select('name, address')
+          .eq('id', requestData.store_id)
+          .single();
+        
+        setStore(storeData);
+      }
+
+      console.log("detailData", detailData);
 
       setRequest(requestData);
       setDetails(detailData || []);
@@ -149,10 +164,10 @@ export default function ServiceDetail() {
       {/* 가게 정보 */}
       <View className="px-4 py-5">
         <Text className="text-[15px] text-[#222] pb-2 pl-3">
-          {request?.stores?.name || '가게 정보 없음'}
+          {store?.name || '가게 정보 없음'}
         </Text>
         <View className="flex-row items-center">
-          <Text className="text-[#222] text-[12px] pl-3">{request?.stores?.address || '주소 정보 없음'}</Text>
+          <Text className="text-[#222] text-[12px] pl-3">{store?.address || '주소 정보 없음'}</Text>
           <Ionicons name="location-sharp" size={16} color="#EB5A36" className="ml-1" />
         </View>
       </View>

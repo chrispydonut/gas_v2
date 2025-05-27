@@ -1,7 +1,5 @@
-
-
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator, RefreshControl, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { supabase } from '../../lib/supabase';
@@ -31,28 +29,35 @@ export default function MyService() {
   const [selected, setSelected] = useState('전체');
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
 
+  const loadRequests = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('service_requests')
+      .select(`id, status, created_at, services(name)`)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('요청 불러오기 실패:', error.message);
+    } else {
+      setRequests(data || []);
+      console.log(data);
+    }
+    setLoading(false);
+  };
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    await loadRequests();
+    setRefreshing(false);
+  }, []);
+
   useEffect(() => {
-    const loadRequests = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from('service_requests')
-        .select(`id, status, created_at, services(name)`)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('요청 불러오기 실패:', error.message);
-      } else {
-        setRequests(data || []);
-        console.log(data);
-      }
-      setLoading(false);
-    };
-
     loadRequests();
   }, []);
 
@@ -81,9 +86,9 @@ export default function MyService() {
   };
 
   return (
-    <View className="bg-white flex-1">
+    <SafeAreaView className="flex-1 bg-white">
       {/* 상단 헤더 */}
-      <View className="pt-20 flex-row items-center justify-between px-5 mb-3">
+      <View className="pt-4 flex-row items-center justify-between px-5 mb-3">
         <TouchableOpacity onPress={() => router.replace('/(tabs)')}>
           <Ionicons name="chevron-back" size={28} color="#222" />
         </TouchableOpacity>
@@ -115,7 +120,17 @@ export default function MyService() {
       {loading ? (
         <ActivityIndicator style={{ marginTop: 20 }} />
       ) : (
-        <ScrollView className='flex-1'>
+        <ScrollView 
+          className='flex-1'
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#FF5A36']}
+              tintColor="#FF5A36"
+            />
+          }
+        >
           {Object.keys(grouped).map(date => (
             <View key={date}>
               <Text className="text-[#888] text-[14px] font-semibold px-6 mb-2 mt-2">{date}</Text>
@@ -140,6 +155,6 @@ export default function MyService() {
           ))}
         </ScrollView>
       )}
-    </View>
+    </SafeAreaView>
   );
 }

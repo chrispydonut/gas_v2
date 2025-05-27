@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { supabase } from '../../../lib/supabase';
@@ -91,8 +91,8 @@ export default function MyService() {
   };
 
   return (
-    <View className="flex-1 bg-white">
-      <View className="pt-20 px-5 mb-3 items-center justify-between flex-row">
+    <SafeAreaView className="flex-1 bg-white">
+      <View className="pt-4 px-5 mb-3 items-center justify-between flex-row">
         <View className="w-[28px]" />
         <Text className="text-[22px] font-bold text-[#222]">서비스 관리</Text>
         <TouchableOpacity onPress={() => router.replace('/authentication/login')}>
@@ -149,6 +149,6 @@ export default function MyService() {
           ))}
         </ScrollView>
       )}
-    </View>
+    </SafeAreaView>
   );
 }

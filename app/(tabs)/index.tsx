@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Image } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Image, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -23,9 +23,9 @@ export default function Home() {
   );
 
   return (
-    <View className="flex-1 bg-white pt-8">
+    <SafeAreaView className="flex-1 bg-white">
       {/* 상단 로고/알림 */}
-      <View className="pt-10 mb-4 px-6 flex-row items-center justify-between">
+      <View className="pt-4 mb-4 px-6 flex-row items-center justify-between">
         <View style={{ width: 40 }} />
         {/* <Text className="text-[26px] font-bold text-[#222] text-center flex-1">Logo3</Text> */}
         <Image source={require('../../assets/logo2.png')} className="w-[100px] h-[57px]" />
@@ -104,6 +104,6 @@ export default function Home() {
           </View>
         )}
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

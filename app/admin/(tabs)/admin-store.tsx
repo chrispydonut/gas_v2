@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, ActivityIndicator, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { supabase } from '../../../lib/supabase';
@@ -45,9 +45,9 @@ export default function AdminStore() {
   }, [search, stores]);
 
   return (
-    <View className="flex-1 bg-white pt-6">
+    <SafeAreaView className="flex-1 bg-white">
       {/* 상단 헤더 */}
-      <View className="flex-row items-center justify-between px-5 pt-14 pb-4 bg-white">
+      <View className="flex-row items-center justify-between px-5 pt-4 pb-4 bg-white">
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={28} color="#222" />
         </TouchableOpacity>
@@ -86,6 +86,6 @@ export default function AdminStore() {
           )}
         </ScrollView>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
