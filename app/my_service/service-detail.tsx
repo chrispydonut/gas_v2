@@ -90,13 +90,14 @@ export default function ServiceDetail() {
     return <ActivityIndicator className="mt-10" />;
   }
 
-  const statusConfig = statusConfigMap[request.status as keyof typeof statusConfigMap] || statusConfigMap['요청됨'];
+  const statusConfig = statusConfigMap[request?.status as keyof typeof statusConfigMap] || statusConfigMap['요청됨'];
   const total = details.reduce((sum, d) => {
     const count = parseInt(d.value.replace(/[^0-9]/g, '')) || 0;
     return sum + count * 25000; // 가격은 임시
   }, 0);
 
   const getStatusTime = () => {
+    if(!request) return '';
     let rawTime: string | null | undefined = null;
   
     switch (request.status) {

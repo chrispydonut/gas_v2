@@ -58,7 +58,7 @@ export default function AdminInquiry() {
   return (
     <View className="flex-1 bg-white pt-10">
       <View className="pt-10 flex-row items-center justify-between px-[18px] mb-3">
-        <TouchableOpacity onPress={() => router.replace('/')}>
+        <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={28} color="#222" />
         </TouchableOpacity>
         <Text className="text-[22px] font-bold text-[#222]">전체 문의</Text>
