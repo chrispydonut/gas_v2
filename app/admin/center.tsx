@@ -17,16 +17,26 @@ export default function AdminCenter() {
   const [input, setInput] = useState('');
   const [adminId, setAdminId] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
+  const channelRef = useRef<any>(null);
   const router = useRouter();
   const { conversation_id } = useLocalSearchParams();
 
+  // adminId 먼저 설정
   useEffect(() => {
-    const init = async () => {
+    const getAdminId = async () => {
       const { data } = await supabase.auth.getUser();
-      const adminIdValue = data.user?.id;
-      if (!adminIdValue || !conversation_id) return;
-      setAdminId(adminIdValue);
+      if (data.user?.id) {
+        setAdminId(data.user.id);
+      }
+    };
+    getAdminId();
+  }, []);
 
+  // adminId, conversation_id가 준비된 이후 실행
+  useEffect(() => {
+    if (!adminId || !conversation_id) return;
+
+    const initChat = async () => {
       // 관리자 자동 할당
       const { data: conv } = await supabase
         .from('conversations')
@@ -37,11 +47,11 @@ export default function AdminCenter() {
       if (!conv?.admin_id) {
         await supabase
           .from('conversations')
-          .update({ admin_id: adminIdValue })
+          .update({ admin_id: adminId })
           .eq('id', conversation_id);
       }
 
-      // 초기 메시지 로딩
+      // 기존 메시지 로딩
       const { data: initialMsgs } = await supabase
         .from('messages')
         .select('*')
@@ -50,7 +60,12 @@ export default function AdminCenter() {
 
       setMessages(initialMsgs || []);
 
-      // 실시간 메시지 리스닝
+      // 기존 채널 제거
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
+
+      // 실시간 채널 구독
       const channel = supabase
         .channel(`chat-${conversation_id}`)
         .on(
@@ -62,30 +77,36 @@ export default function AdminCenter() {
             filter: `conversation_id=eq.${conversation_id}`,
           },
           (payload) => {
-            setMessages((prev) => [...prev, payload.new]);
+            const newMessage = payload.new;
+            setMessages((prev) => [...prev, newMessage]);
             setTimeout(() => flatListRef.current?.scrollToEnd(), 100);
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('✅ 채널 상태:', status);
+        });
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
+      channelRef.current = channel;
     };
 
-    init();
-  }, [conversation_id]);
+    initChat();
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+    };
+  }, [adminId, conversation_id]);
 
   const handleSend = async () => {
     if (!input.trim() || !conversation_id || !adminId) return;
 
-    await supabase
-      .from('messages')
-      .insert({
-        conversation_id,
-        sender_id: adminId,
-        content: input.trim(),
-      });
+    await supabase.from('messages').insert({
+      conversation_id,
+      sender_id: adminId,
+      content: input.trim(),
+    });
 
     await supabase
       .from('conversations')

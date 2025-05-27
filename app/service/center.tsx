@@ -7,6 +7,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
@@ -16,65 +17,109 @@ export default function AdminCenter() {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [adminId, setAdminId] = useState<string | null>(null);
+  const [hasNewMessage, setHasNewMessage] = useState(false);
+  const notificationOpacity = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef<FlatList>(null);
+  const channelRef = useRef<any>(null); // channel 저장
   const router = useRouter();
   const { conversation_id } = useLocalSearchParams();
 
+  // adminId 설정은 따로 처리
   useEffect(() => {
-    const init = async () => {
+    const fetchAdminId = async () => {
       const { data } = await supabase.auth.getUser();
-      const adminIdValue = data.user?.id;
-      if (!adminIdValue || !conversation_id) return;
-      setAdminId(adminIdValue);
-
-      // 관리자 자동 할당
-      const { data: conv } = await supabase
-        .from('conversations')
-        .select('admin_id')
-        .eq('id', conversation_id)
-        .single();
-
-      if (!conv?.admin_id) {
-        await supabase
-          .from('conversations')
-          .update({ admin_id: adminIdValue })
-          .eq('id', conversation_id);
+      if (data?.user?.id) {
+        setAdminId(data.user.id);
       }
-
-      // 초기 메시지 로딩
-      const { data: initialMsgs } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('conversation_id', conversation_id)
-        .order('created_at');
-
-      setMessages(initialMsgs || []);
-
-      // 실시간 메시지 리스닝
-      const channel = supabase
-        .channel('admin-chat-realtime')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages',
-            filter: `conversation_id=eq.${conversation_id}`,
-          },
-          (payload) => {
-            setMessages((prev) => [...prev, payload.new]);
-            setTimeout(() => flatListRef.current?.scrollToEnd(), 100);
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
     };
+    fetchAdminId();
+  }, []);
 
-    init();
-  }, [conversation_id]);
+
+  // 구독과 메시지 로딩은 adminId가 확정된 이후에만 실행
+useEffect(() => {
+  if (!adminId || !conversation_id) return;
+
+  const setup = async () => {
+    // 관리자 자동 할당
+    const { data: conv } = await supabase
+      .from('conversations')
+      .select('admin_id')
+      .eq('id', conversation_id)
+      .single();
+
+    if (!conv?.admin_id) {
+      await supabase
+        .from('conversations')
+        .update({ admin_id: adminId })
+        .eq('id', conversation_id);
+    }
+
+    // 메시지 초기 로딩
+    const { data: initialMsgs } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('conversation_id', conversation_id)
+      .order('created_at');
+
+    setMessages(initialMsgs || []);
+
+    // 이전 채널 제거
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+    }
+
+    const channel = supabase
+      .channel(`admin-chat-${conversation_id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversation_id}`,
+        },
+        (payload) => {
+          const newMessage = payload.new;
+          setMessages((prev) => [...prev, newMessage]);
+
+          if (newMessage.sender_id !== adminId) {
+            setHasNewMessage(true);
+            Animated.sequence([
+              Animated.timing(notificationOpacity, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+              }),
+              Animated.delay(2000),
+              Animated.timing(notificationOpacity, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+              }),
+            ]).start(() => setHasNewMessage(false));
+          }
+
+          setTimeout(() => flatListRef.current?.scrollToEnd(), 100);
+        }
+      )
+      .subscribe((status) => {
+        console.log("✅ 채널 상태:", status);
+      });
+
+    channelRef.current = channel;
+  };
+
+  setup();
+
+  return () => {
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+  };
+}, [adminId, conversation_id]);
+
 
   const handleSend = async () => {
     if (!input.trim() || !conversation_id || !adminId) return;
@@ -102,12 +147,32 @@ export default function AdminCenter() {
     <View className="flex-1 bg-white pt-8">
       <Stack.Screen options={{ headerShown: false }} />
       <View className="pt-12 flex-row items-center justify-between px-5 mb-3">
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={28} color="#222" />
-          </TouchableOpacity>
-          <Text className="text-[22px] font-bold text-[#222]">고객센터</Text>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={28} color="#222" />
+        </TouchableOpacity>
+        <Text className="text-[22px] font-bold text-[#222]">고객센터</Text>
+        <View className="relative">
           <Ionicons name="notifications-outline" size={26} color="#222" />
+          {hasNewMessage && (
+            <Animated.View
+              style={{
+                opacity: notificationOpacity,
+                position: 'absolute',
+                top: -5,
+                right: -5,
+                backgroundColor: '#EB5A36',
+                borderRadius: 10,
+                width: 20,
+                height: 20,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Text className="text-white text-xs">1</Text>
+            </Animated.View>
+          )}
         </View>
+      </View>
 
       <FlatList
         ref={flatListRef}
