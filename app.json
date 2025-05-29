@@ -29,12 +29,22 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.chan23l.gas2"
+      "bundleIdentifier": "com.chan23l.gas2",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.chan23l.gas2"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f369b15a-9747-42fd-b228-8559d4b35a42"
       }
     }
   }
