@@ -50,7 +50,43 @@ export default function Inquiry() {
           <Ionicons name="chevron-back" size={28} color="#222" />
         </TouchableOpacity>
         <Text className="text-[22px] font-bold text-[#222]">문의하기</Text>
-        <TouchableOpacity onPress={() => router.push('/service/center')}>
+        <TouchableOpacity
+          onPress={async () => {
+            const { data: userData } = await supabase.auth.getUser();
+            const userId = userData.user?.id;
+            if (!userId) return;
+
+            // 이미 진행 중인 빈 대화가 있는지 확인
+            const { data: existing } = await supabase
+              .from('conversations')
+              .select('id')
+              .eq('user_id', userId)
+              .is('admin_id', 'f0887d78-02cc-4e94-a9a5-76baf8bac9f4') // 아직 할당되지 않은
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            let conversationId = existing?.id;
+
+            // 없으면 새로 생성
+            if (!conversationId) {
+              const { data: created, error } = await supabase
+                .from('conversations')
+                .insert({ user_id: userId })
+                .select()
+                .single();
+
+              if (error || !created) {
+                console.warn('새 문의 생성 실패:', error?.message);
+                return;
+              }
+
+              conversationId = created.id;
+            }
+
+            router.push(`/service/center?conversation_id=${conversationId}`);
+          }}
+        >
           <Ionicons name="create-outline" size={26} color="#222" />
         </TouchableOpacity>
       </View>
