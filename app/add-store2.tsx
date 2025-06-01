@@ -9,6 +9,7 @@ import {
   Platform,
   ActivityIndicator,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import KakaoMapView from '../components/KakaoMapView';
 import { supabase } from '../lib/supabase';
@@ -119,16 +120,29 @@ export default function AddStore2() {
   };
 
   const saveStore = async () => {
+    console.log("saveStore", name, address);
     const { data: sessionData } = await supabase.auth.getSession();
     const userId = sessionData?.session?.user.id;
 
-    const { error } = await supabase.from('stores').insert([
-      {
-        user_id: userId,
-        name,
-        address,
-      },
-    ]);
+    console.log("userId", userId);
+    // const { error } = await supabase.from('stores').insert([
+    //   {
+    //     user_id: userId,
+    //     name,
+    //     address,
+    //   },
+    // ]);
+    const { data, error } = await supabase.from('stores').insert({
+      user_id: userId,
+      name,
+      address,
+    }).select().single();
+
+    console.log("data", data);
+    console.log("error", error);
+    if (error) {
+      Alert.alert("error", error?.message);
+    }
 
     if (!error) {
       router.replace('/profile/my-store');

@@ -26,7 +26,7 @@ export async function addNotification(
     {
       user_id: userId,
       title,
-      desc,
+      description: desc,
       icon_type: iconType,
     },
   ]);

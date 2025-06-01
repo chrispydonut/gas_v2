@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Modal, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Modal, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { supabase } from '~/lib/supabase';
@@ -147,14 +147,17 @@ export default function AlarmReplace() {
           })}
 
           {/* 추가 요청사항 */}
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <TextInput
             className="w-full min-h-[56px] h-32 bg-[#F6F7FB] rounded-2xl px-4 py-4 text-[15px] text-[#888] mt-1"
-            placeholder="추가 요청사항을 입력해주세요.."
+            placeholder="추가 요청사항을 입력해주세요."
             placeholderTextColor="#bbb"
             value={extra}
             onChangeText={setExtra}
-            multiline
+            returnKeyType="done"
+            onSubmitEditing={Keyboard.dismiss}
           />
+          </TouchableWithoutFeedback>
         </View>
 
         {/* 하단 버튼 */}

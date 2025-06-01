@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "gas2",
+    "name": "우리동네가스",
     "slug": "gas2",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "scheme": "gas2",
     "web": {
       "bundler": "metro",
@@ -46,6 +46,14 @@
       "eas": {
         "projectId": "f369b15a-9747-42fd-b228-8559d4b35a42"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f369b15a-9747-42fd-b228-8559d4b35a42",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
     }
   }
 }

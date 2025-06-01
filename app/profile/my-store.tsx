@@ -58,7 +58,7 @@ export default function MyStoreScreen() {
       <SafeAreaView className="flex-1 bg-white">
         {/* 상단 헤더 */}
         <View className="flex-row items-center justify-between px-5 pt-4 pb-2">
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity onPress={() => router.push('/profile')}>
             <Ionicons name="chevron-back" size={28} color="#222" />
           </TouchableOpacity>
           <Text className="text-[22px] font-bold text-[#222]">나의 가게</Text>
@@ -106,34 +106,34 @@ export default function MyStoreScreen() {
 
         {/* 하단 적용 버튼 */}
         <View className="absolute left-0 right-0 bottom-14 items-center">
-        <TouchableOpacity
-  className={`w-[90%] rounded-[28px] py-5 items-center ${
-    selected === null ? 'bg-[#FADCD2]' : 'bg-[#EB5A36]'
-  }`}
-  disabled={selected === null}
-  activeOpacity={0.8}
-  onPress={async () => {
-    if (selected === null) return;
-    const selectedStore = stores[selected];
-    const { data: sessionData } = await supabase.auth.getSession();
-    const userId = sessionData?.session?.user.id;
+          <TouchableOpacity
+            className={`w-[90%] rounded-[28px] py-5 items-center ${
+              selected === null ? 'bg-[#FADCD2]' : 'bg-[#EB5A36]'
+            }`}
+            disabled={selected === null}
+            activeOpacity={0.8}
+            onPress={async () => {
+              if (selected === null) return;
+              const selectedStore = stores[selected];
+              const { data: sessionData } = await supabase.auth.getSession();
+              const userId = sessionData?.session?.user.id;
 
-    if (userId && selectedStore?.id) {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ default_store_id: selectedStore.id })
-        .eq('id', userId);
-      if (error) {
-        alert('적용에 실패했습니다.');
-        return;
-      }
-    }
+              if (userId && selectedStore?.id) {
+                const { error } = await supabase
+                  .from('profiles')
+                  .update({ default_store_id: selectedStore.id })
+                  .eq('id', userId);
+                if (error) {
+                  alert('적용에 실패했습니다.');
+                  return;
+                }
+              }
 
-    router.replace('/profile/my-store');
-  }}
->
-  <Text className="text-white text-[16px] font-bold">적용</Text>
-</TouchableOpacity>
+              router.replace('/profile/my-store');
+            }}
+          >
+            <Text className="text-white text-[16px] font-bold">적용</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     </>

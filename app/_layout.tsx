@@ -3,13 +3,38 @@ import { supabase } from '../lib/supabase';
 import '../global.css';
 
 import { Redirect, Stack } from 'expo-router';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Alert, View } from 'react-native';
+import * as Updates from 'expo-updates';
+import { getKeyHashAndroid } from '@react-native-kakao/core';
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',
 };
 
 export default function RootLayout() {
+  // useEffect(() => {
+  //   getKeyHashAndroid().then(console.log);
+  // }, []);
+
+  useEffect(() => {
+
+    const checkForUpdates = async () => {
+      try {
+        const update = await Updates.checkForUpdateAsync();
+        if (update.isAvailable) {
+          await Updates.fetchUpdateAsync();
+          Alert.alert("업데이트가 있습니다", "앱을 재시작합니다", [
+            { text: "확인", onPress: () => Updates.reloadAsync() },
+          ]);
+        }
+      } catch (e) {
+        console.error("업데이트 확인 실패", e);
+      }
+    };
+  
+    checkForUpdates();
+  }, []);
+
   // const [isLoading, setIsLoading] = useState(true);
   // const [hasUser, setHasUser] = useState<boolean | null>(null);
 
