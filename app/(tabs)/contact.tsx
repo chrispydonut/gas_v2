@@ -120,12 +120,39 @@ export default function Inquiry() {
 
       {/* 문의 내역 리스트 */}
       {loading ? (
-        <ActivityIndicator className="mt-10 text-[#222]" />
+        <ActivityIndicator className="mt-10 text-[#FF5A36]" />
       ) : (
         conversations.length > 0 ? (
-        <FlatList
+          <FlatList
           data={conversations}
           keyExtractor={item => item.id.toString()}
+          refreshing={loading}
+          onRefresh={async () => {
+            setLoading(true);
+            const { data: userData, error: userError } = await supabase.auth.getUser();
+            const { data: profileData } = await supabase.from('profiles').select('*').eq('id', userData.user?.id).single();
+            setProfile(profileData);
+        
+            const userId = userData.user?.id;
+            if (!userId) {
+              console.warn('❗ 유저 ID 없음 — 로그인 상태 확인 필요');
+              setLoading(false);
+              return;
+            }
+        
+            const { data, error } = await supabase
+              .from('conversations')
+              .select('id, updated_at, messages(content, created_at)')
+              .eq('user_id', userId)
+              .order('updated_at', { ascending: false });
+        
+            if (error) {
+              console.warn('대화 불러오기 실패:', error.message);
+            } else {
+              setConversations(data || []);
+            }
+            setLoading(false);
+          }}
           renderItem={({ item }) => {
             const latestMessage = item.messages?.[item.messages.length - 1];
             return (
@@ -146,6 +173,7 @@ export default function Inquiry() {
             );
           }}
         />
+        
         ) : (
           <View className="flex-1 justify-center items-center">
             <Text className="text-[#888] text-[14px]">문의 내역이 없습니다.</Text>
