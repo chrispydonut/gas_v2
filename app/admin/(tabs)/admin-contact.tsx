@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { supabase } from '../../../lib/supabase';
 
 export default function AdminInquiry() {
@@ -9,42 +9,51 @@ export default function AdminInquiry() {
   const [conversations, setConversations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchConversations = async () => {
-      // 로그인된 유저 정보 가져오기
-    const getUserId = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      if (error) {
-        console.warn('유저 정보 불러오기 실패:', error.message);
-      } else {
-        console.log('로그인된 유저:', data.user);  // <-- 여기에서 user.id 찍힘
-      }
-    };
-    getUserId();
-        
-      const { data, error } = await supabase
-        .from('conversations')
-        .select(`
-          id,
-          user_id,
-          store_id,
-          updated_at,
-          messages(content, created_at),
-          stores(name)
-        `)
-        .order('updated_at', { ascending: false });
+  
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      const fetchConversations = async () => {
+        // 로그인된 유저 정보 가져오기
+        const getUserId = async () => {
+          const { data, error } = await supabase.auth.getUser();
+          if (error) {
+            console.warn('유저 정보 불러오기 실패:', error.message);
+          } else {
+            console.log('로그인된 유저:', data.user);  // <-- 여기에서 user.id 찍힘
+          }
+        };
+        getUserId();
+            
+        const { data, error } = await supabase
+          .from('conversations')
+          .select(`
+            id,
+            user_id,
+            store_id,
+            updated_at,
+            messages(content, created_at),
+            stores(name)
+          `)
+          .order('updated_at', { ascending: false });
 
-      if (error) {
-        console.warn('대화 불러오기 실패:', error.message);
-      } else {
-        setConversations(data || []);
-      }
+        if (error) {
+          console.warn('대화 불러오기 실패:', error.message);
+        } else {
+          setConversations(data || []);
+        }
 
-      setLoading(false);
-    };
+        setLoading(false);
+      };
 
-    fetchConversations();
-  }, []);
+      fetchConversations();
+
+      return () => {
+        isActive = false;
+      };
+    }, [])
+  );
+  
 
   const formatTime = (iso: string) => {
     const date = new Date(iso);
@@ -68,6 +77,7 @@ export default function AdminInquiry() {
       {loading ? (
         <ActivityIndicator className="mt-10" />
       ) : (
+        conversations.length > 0 ? (
         <FlatList
           data={conversations}
           keyExtractor={item => item.id.toString()}
@@ -95,6 +105,11 @@ export default function AdminInquiry() {
             );
           }}
         />
+        ) : (
+          <View className="flex-1 justify-center items-center">
+            <Text className="text-[#888] text-[14px]">문의 내역이 없습니다.</Text>
+          </View>
+        )
       )}
     </SafeAreaView>
   );

@@ -8,7 +8,7 @@ import { Redirect } from 'expo-router';
 export default function TabLayout() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasUser, setHasUser] = useState<boolean | null>(null);
-
+  const [user, setUser] = useState<any>(null);
   useEffect(() => {
     const checkUser = async () => {
       try {
@@ -25,6 +25,7 @@ export default function TabLayout() {
           setHasUser(false);
         } else {
           setHasUser(true);
+          setUser(userData.user);
         }
       } catch (err) {
         console.error('예외 발생:', err);
@@ -45,9 +46,14 @@ export default function TabLayout() {
     );
   }
 
-  if (!hasUser) {
+  if (!hasUser && !isLoading) {
     return <Redirect href="/authentication/login" />;
   }
+
+  if(user?.id === 'f0887d78-02cc-4e94-a9a5-76baf8bac9f4') {
+    return <Redirect href="/admin/(tabs)/admin-service" />;
+  }
+
   return (
     <Tabs
       screenOptions={{

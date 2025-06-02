@@ -48,12 +48,12 @@ useEffect(() => {
       .eq('id', conversation_id)
       .single();
 
-    if (!conv?.admin_id) {
-      await supabase
-        .from('conversations')
-        .update({ admin_id: adminId })
-        .eq('id', conversation_id);
-    }
+    // if (!conv?.admin_id) {
+    //   await supabase
+    //     .from('conversations')
+    //     .update({ admin_id: adminId })
+    //     .eq('id', conversation_id);
+    // }
 
     // 메시지 초기 로딩
     const { data: initialMsgs } = await supabase
@@ -121,25 +121,34 @@ useEffect(() => {
 }, [adminId, conversation_id]);
 
 
-  const handleSend = async () => {
-    if (!input.trim() || !conversation_id || !adminId) return;
+const handleSend = async () => {
+  if (!input.trim() || !conversation_id || !adminId) return;
 
-    await supabase
-      .from('messages')
-      .insert({
-        conversation_id,
-        sender_id: adminId,
-        content: input.trim(), 
-      });
+  const content = input.trim();
+  setInput('');
 
-    await supabase
-      .from('conversations')
-      .update({ updated_at: new Date().toISOString() }) 
-      .eq('id', conversation_id);
+  const { error } = await supabase
+    .from('messages')
+    .insert({
+      conversation_id,
+      sender_id: adminId,
+      content,
+    });
 
-    setInput('');
-    setTimeout(() => flatListRef.current?.scrollToEnd(), 100);
-  };
+  if (error) {
+    console.warn('❗ 메시지 전송 실패:', error.message);
+    return;
+  }
+
+  await supabase
+    .from('conversations')
+    .update({ updated_at: new Date().toISOString() })
+    .eq('id', conversation_id);
+
+  setTimeout(() => flatListRef.current?.scrollToEnd(), 100);
+};
+
+
 
   if (!adminId) return null;
 

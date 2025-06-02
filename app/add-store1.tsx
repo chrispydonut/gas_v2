@@ -74,9 +74,9 @@ export default function AddStore1() {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white pt-24">
       {/* 검색창 */}
-      <View className="flex-1 justify-center px-6">
+      <View className="justify-start px-6">
         <View className="flex-row items-center w-full">
           <TextInput
             className="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-base bg-white"
@@ -120,7 +120,8 @@ export default function AddStore1() {
             </Text>
           ) : null
         }
-        style={{ maxHeight: 350 }}
+        style={{ marginTop: 16, maxHeight: 350 }}
+        contentContainerStyle={{ paddingBottom: 20 }}
       />
     </View>
   );
