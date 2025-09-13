@@ -4,6 +4,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 
+const PRICE= {
+  '(일반화구) 1열 1구': 19000,
+  '(일반화구) 2열 2구': 33000,
+  '(일반화구) 3열 3구': 75000,
+  '(시그마버너) 1열 1구': 27000,
+  '(시그마버너) 2열 2구': 40000,
+  '(시그마버너) 3열 3구': 140000,
+  '8미리 밸브교체': 15000,
+  '공기조절기 교체': 15000,
+  '경보기 교체': 15000,
+  '배관 철거': 15000,
+  '가스누출점검(기본출장비)': 3000,
+}
+
 export default function ServiceDetail() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
@@ -106,9 +120,12 @@ export default function ServiceDetail() {
   }
 
   const statusConfig = statusConfigMap[request?.status as keyof typeof statusConfigMap] || statusConfigMap['요청됨'];
+
   const total = details.reduce((sum, d) => {
     const count = parseInt(d.value.replace(/[^0-9]/g, '')) || 0;
-    return sum + count * 25000; // 가격은 임시
+    const key = d.key || '';
+    const unitPrice = PRICE[key as keyof typeof PRICE] ?? 0;
+    return sum + count * unitPrice;
   }, 0);
 
   const getStatusTime = () => {

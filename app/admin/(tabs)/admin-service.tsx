@@ -137,7 +137,7 @@ export default function MyService() {
                     resizeMode="contain"
                   />
                   <Text className="flex-1 text-[17px] font-bold text-[#222]">
-                    {`${service.store.name} - ${SERVICE_NAME_MAP[service.service.name] || service.service.name}`}
+                    {`${service.store?.name} - ${SERVICE_NAME_MAP[service.service?.name] || service.service?.name}`}
                   </Text>
                   <View className="ml-2">
                     {STATUS_ICON[service.status as keyof typeof STATUS_ICON]?.icon}

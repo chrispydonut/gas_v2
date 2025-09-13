@@ -6,11 +6,21 @@ import { supabase } from '~/lib/supabase';
 import { addNotification } from '../notification/page';
 
 const ITEMS = [
-  { id: 1, name: '1열 1구', price: 15000 },
-  { id: 2, name: '1열 1구', price: 25000 },
-  { id: 3, name: '2열 2구', price: 30000 },
-  { id: 4, name: '2열 2구', price: 40000 },
-  { id: 5, name: '3열 3구', price: 50000 },
+  { id: 1, name: '(일반화구) 1열 1구', price: 19000 },
+  { id: 2, name: '(일반화구) 2열 2구', price: 33000 },
+  { id: 3, name: '(일반화구) 3열 3구', price: 75000 },
+  { id: 4, name: '(시그마버너) 1열 1구', price: 27000 },
+  { id: 5, name: '(시그마버너) 2열 2구', price: 40000 },
+  { id: 6, name: '(시그마버너) 3열 3구', price: 140000 },
+];
+
+const IMAGES = [
+  require('../../assets/burner/1.png'),
+  require('../../assets/burner/2.png'),
+  require('../../assets/burner/3.png'),
+  require('../../assets/burner/4.png'),
+  require('../../assets/burner/5.png'),
+  require('../../assets/burner/6.jpg'),
 ];
 
 export default function BurnerReplaceScreen() {
@@ -26,6 +36,7 @@ export default function BurnerReplaceScreen() {
   };
 
   const total = counts.reduce((sum, c, i) => sum + c * ITEMS[i].price, 0);
+  console.log(total);
   const anySelected = counts.some(c => c > 0);
 
   const handleSubmit = async () => {
@@ -132,7 +143,7 @@ export default function BurnerReplaceScreen() {
             >
               {/* 이미지 자리 */}
               <View className="w-16 h-16 bg-[#F3F6FA] rounded-xl items-center justify-center mr-4">
-                <Image source={require('../../assets/burner.png')} resizeMode="contain" />
+                <Image source={IMAGES[item.id - 1]} resizeMode="contain" className="w-full h-full" />
               </View>
               {/* 정보 */}
               <View className="flex-1">

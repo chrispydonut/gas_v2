@@ -1,18 +1,35 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, Alert, TouchableWithoutFeedback, Keyboard, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, Alert, TouchableWithoutFeedback, Keyboard, TextInput, ScrollView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { addNotification } from '../notification/page';
 import { supabase } from '~/lib/supabase';
+
+const ITEMS = [
+  { id: 1, name: '8미리 밸브교체', price: 15000 },
+  { id: 2, name: '공기조절기 교체', price: 15000 },
+];
+
+const IMAGES = [
+  require('../../assets/valve/1.jpg'),
+  require('../../assets/valve/air.png'),
+];
 
 export default function Pipe() {
   const router = useRouter();
   const [extra, setExtra] = useState('');
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [counts, setCounts] = useState(Array(ITEMS.length).fill(0));
 
   const activeColor = '#EB5A36';
   const inactiveColor = '#FFBDBD';
+
+  const handleCount = (idx: number, diff: number) => {
+    setCounts(prev =>
+      prev.map((c, i) => (i === idx ? Math.max(0, c + diff) : c))
+    );
+  };
 
   const handleSubmit = async () => {
     if (extra === null) return;
@@ -65,13 +82,36 @@ export default function Pipe() {
       return;
     }
 
-    const details = [
-      {
+    // const details = [
+    //   {
+    //     request_id: request.id,
+    //     key: '추가 요청사항',
+    //     value: extra,
+    //   },
+    // ];
+
+    const details = ITEMS
+      .map((item, idx) => {
+        const count = counts[idx];
+        if (count > 0) {
+          return {
+            request_id: request.id,
+            key: item.name,
+            value: `${count}개`,
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    // 추가 요청사항 추가
+    if (extra !== '') {
+      details.push({
         request_id: request.id,
         key: '추가 요청사항',
         value: extra,
-      },
-    ];
+      });
+    }
 
     const { error: detailError } = await supabase
       .from('request_details')
@@ -94,6 +134,10 @@ export default function Pipe() {
     }
   };  
 
+  const total = counts.reduce((sum, c, i) => sum + c * ITEMS[i].price, 0);
+  console.log(total);
+  const anySelected = counts.some(c => c > 0);
+
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
@@ -108,8 +152,45 @@ export default function Pipe() {
             <Ionicons name="notifications-outline" size={26} color="#222" />
           </TouchableOpacity>
         </View>
+
+        
         
         <View className="px-4">
+          {/* 아이템 리스트 */}
+          <ScrollView className="px-0" contentContainerStyle={{ paddingBottom: 8 }}>
+            {ITEMS.map((item, idx) => (
+              <View
+                key={item.id}
+                className="flex-row items-center bg-white rounded-2xl border border-[#eee] px-4 py-3 mb-3"
+              >
+                {/* 이미지 자리 */}
+                <View className="w-16 h-16 bg-[#F3F6FA] rounded-xl items-center justify-center mr-4">
+                  <Image source={IMAGES[item.id - 1]} resizeMode="contain" className="w-full h-full" />
+                </View>
+                {/* 정보 */}
+                <View className="flex-1">
+                  <Text className="text-[15px] font-bold text-[#222] mb-2">{item.name}</Text>
+                  <View className="flex-row items-center">
+                    <TouchableOpacity
+                      className="w-7 h-7 rounded-full bg-[#FADCD2] items-center justify-center mr-2"
+                      onPress={() => handleCount(idx, -1)}
+                    >
+                      <Text className="text-[#EB5A36] text-xl font-bold">-</Text>
+                    </TouchableOpacity>
+                    <Text className="text-[16px] font-bold text-[#222] w-6 text-center">{counts[idx]}</Text>
+                    <TouchableOpacity
+                      className="w-7 h-7 rounded-full bg-[#FADCD2] items-center justify-center ml-2"
+                      onPress={() => handleCount(idx, 1)}
+                    >
+                      <Text className="text-[#EB5A36] text-xl font-bold">+</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                {/* 가격 */}
+                <Text className="text-[15px] font-bold text-[#222] ml-2">{item.price.toLocaleString()}원</Text>
+              </View>
+            ))}
+          </ScrollView>
           <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <TextInput
               className="w-full min-h-[56px] h-32 bg-[#F6F7FB] rounded-2xl px-4 py-4 text-[15px] text-[#888] mt-1"
@@ -124,11 +205,15 @@ export default function Pipe() {
         </View>        
         {/* 하단 버튼 */}
         <View className="absolute left-0 right-0 bottom-14 items-center">
+          <View className="flex-row w-full justify-between items-center mb-5 px-7">
+            <Text className="text-[#888] text-[15px]">전체</Text>
+            <Text className="text-[18px] font-bold text-[#EB5A36]">{total.toLocaleString()} 원</Text>
+          </View>
           <TouchableOpacity
-            className="w-[90%] rounded-[28px] py-5 items-center"
-            style={{ backgroundColor: extra !== '' ? activeColor : inactiveColor }}
+            className={anySelected ? "bg-[#EB5A36] rounded-[28px] py-5 items-center w-[90%]" : "bg-[#FADCD2] rounded-[28px] py-5 items-center w-[90%]"}
+            onPress={() => anySelected && handleSubmit()}
+            disabled={!anySelected}
             activeOpacity={0.8}
-            onPress={handleSubmit}
           >
             <Text className="text-white text-[16px] font-bold">
               {loading ? '신청 중...' : '밸브 교체 신청'}

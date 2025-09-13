@@ -5,11 +5,11 @@ import { useRouter } from 'expo-router';
 
 const SERVICES = [
   { key: 'burner', label: '화구교체', icon: require('../../assets/burner.png') },
+  { key: 'valve', label: '밸브 교체\n(공기 조절기)', icon: require('../../assets/valve.png') },
   { key: 'alarm', label: '경보기 교체', icon: require('../../assets/alarm.png') },
-  { key: 'pipe', label: '배관 철거', icon: require('../../assets/pipe.png') },
   { key: 'quote', label: '시공견적 문의', icon: require('../../assets/quote.png') },
+  { key: 'pipe', label: '배관 철거', icon: require('../../assets/pipe.png') },
   { key: 'gas', label: '가스누출 검사', icon: require('../../assets/gas.png') },
-  { key: 'valve', label: '밸브 교체', icon: require('../../assets/valve.png') },
   { key: 'contract', label: '정기계약 이용권', icon: require('../../assets/contract.png') },
   { key: 'center', label: '고객센터', icon: require('../../assets/center.png') },
 ];
@@ -69,7 +69,9 @@ export default function Home() {
                     onPress={() => router.push(item.key === 'center' ? '/contact' : `/service/${item.key}` as any)}
                   >
                     <Image source={item.icon} className="w-12 h-12 mb-2" resizeMode="contain" />
-                    <Text className="text-[15px] text-[#222] font-medium text-center">{item.label}</Text>
+                    <Text className="text-[15px] text-[#222] font-medium text-center" style={{ lineHeight: 18 }}>
+                      {item.label}
+                    </Text>
                   </TouchableOpacity>
                 ))}
                 {SERVICES.slice(i * 3, i * 3 + 3).length < 3 &&
@@ -98,7 +100,9 @@ export default function Home() {
                 style={{ marginLeft: 0, marginRight: 16 }}
               >
                 <Image source={item.icon} className="w-16 h-16 mb-2" resizeMode="contain" />
-                <Text className="text-[15px] text-[#222] font-medium text-center">{item.label}</Text>
+                <Text className="text-[15px] text-[#222] font-medium text-center" style={{ lineHeight: 18 }}>
+                  {item.label}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>

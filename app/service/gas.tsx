@@ -110,6 +110,8 @@ export default function Pipe() {
         </View>
 
         <View className="px-4">
+          {/* 기본 출장비 3000원 안내문구 */}
+          <Text className="text-[15px] mb-2 pl-1 pt-4">기본 출장비 30,000원 부터 추가됩니다.</Text>
           <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
             <TextInput
               className="w-full min-h-[56px] h-32 bg-[#F6F7FB] rounded-2xl px-4 py-4 text-[15px] text-[#888] mt-1"
