@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { supabase } from '../lib/supabase';
 
@@ -74,7 +74,10 @@ export default function AddStore1() {
   };
 
   return (
-    <View className="flex-1 bg-white pt-24">
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1 bg-white pt-24"
+    >
       {/* 검색창 */}
       <View className="justify-start px-6">
         <View className="flex-row items-center w-full">
@@ -123,6 +126,6 @@ export default function AddStore1() {
         style={{ marginTop: 16, maxHeight: 350 }}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }

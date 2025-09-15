@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 import { toInternational } from '../../lib/toInternational';
@@ -130,7 +130,10 @@ export default function Signup() {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1 bg-white"
+    >
       {/* 상단 뒤로가기 */}
       <View className="absolute top-14 left-4 z-10">
         <TouchableOpacity onPress={handleBack} className="flex-row items-center">
@@ -138,7 +141,10 @@ export default function Signup() {
         </TouchableOpacity>
       </View>
 
-      <View className="flex-1 justify-center p-6">
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }}
+        keyboardShouldPersistTaps="handled"
+      >
         <Text className="text-3xl font-bold mb-8 text-center">회원가입</Text>
 
         <TextInput
@@ -181,7 +187,7 @@ export default function Signup() {
             <Text className="text-white text-center font-medium text-base">확인</Text>
           </TouchableOpacity>
         )}
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

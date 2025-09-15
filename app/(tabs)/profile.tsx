@@ -129,7 +129,7 @@ export default function Profile() {
           </TouchableOpacity>
           <MenuItem icon={<Feather name="gift" size={20} color="#222" />} label="프로모션" />
           <MenuItem icon={<Feather name="credit-card" size={20} color="#222" />} label="결제 수단" onPress={() => router.push('/profile/payment')} />
-          <MenuItem icon={<Feather name="help-circle" size={20} color="#222" />} label="고객센터" onPress={() => router.push('/service/center')} />
+          <MenuItem icon={<Feather name="help-circle" size={20} color="#222" />} label="고객센터" onPress={() => router.push('/contact')} />
         </View>
 
         {/* 알림 받기 스위치 */}

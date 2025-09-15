@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Modal, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Modal, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { supabase } from '~/lib/supabase';
@@ -111,7 +111,10 @@ export default function AlarmReplace() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-8">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1 bg-white pt-8"
+      >
         {/* 상단 헤더 */}
         <View className="pt-12 flex-row items-center justify-between px-5 mb-5">
           <TouchableOpacity onPress={() => router.back()}>
@@ -192,7 +195,7 @@ export default function AlarmReplace() {
             </View>
           </View>
         </Modal>
-      </View>
+      </KeyboardAvoidingView>
     </>
   );
 }

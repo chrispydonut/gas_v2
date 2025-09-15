@@ -5,9 +5,9 @@ import { Stack, useRouter } from 'expo-router';
 
 const PAYMENT_METHODS = [
   { id: 'cash', label: '현금', icon: <MaterialIcons name="attach-money" size={24} color="#4CAF50" /> },
-  { id: 'apple', label: 'Apple Pay', icon: <FontAwesome name="apple" size={24} color="#000" /> },
-  { id: 'card1', label: '**** **** **** 0895', icon: <FontAwesome name="cc-jcb" size={24} color="#1976D2" /> },
-  { id: 'card2', label: '**** **** **** 2259', icon: <FontAwesome5 name="cc-mastercard" size={24} color="#EB5A36" /> },
+  // { id: 'apple', label: 'Apple Pay', icon: <FontAwesome name="apple" size={24} color="#000" /> },
+  { id: 'card1', label: '계좌이체', icon: <FontAwesome name="cc-jcb" size={24} color="#1976D2" /> },
+  { id: 'card2', label: '카드', icon: <FontAwesome5 name="cc-mastercard" size={24} color="#EB5A36" /> },
 ];
 
 export default function PaymentScreen() {
@@ -18,20 +18,20 @@ export default function PaymentScreen() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView className="flex-1 bg-white">
+      <SafeAreaView className="flex-1 bg-white mb-4">
         {/* 상단 헤더 */}
         <View className="flex-row items-center justify-between px-5 pt-4 pb-2">
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="chevron-back" size={28} color="#222" />
           </TouchableOpacity>
-          <Text className="text-[22px] font-bold text-[#222]">화구교체</Text>
+          <Text className="text-[22px] font-bold text-[#222]">결제</Text>
           <TouchableOpacity>
             <Ionicons name="notifications-outline" size={26} color="#222" />
           </TouchableOpacity>
         </View>
 
         {/* 결제수단 리스트 */}
-        <ScrollView className="px-5" contentContainerStyle={{ paddingBottom: 24 }}>
+        <ScrollView className="px-5" contentContainerStyle={{ paddingBottom: 24, paddingTop: 12 }}>
           {PAYMENT_METHODS.map((method) => (
             <TouchableOpacity
               key={method.id}

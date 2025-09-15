@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 import { toInternational } from '../../lib/toInternational';
@@ -158,11 +158,18 @@ export default function Login() {
   };
 
   return (
-    <View className="flex-1 justify-center p-6 bg-white -mt-28">
-      {/* <Text className="text-3xl font-bold mb-8 text-center">로그인</Text> */}
-      <View className="flex-row items-center justify-center mb-20">
-        <Image source={require('../../assets/logo.png')} className="w-[172.8px] h-[104.6px]" />
-      </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1 bg-white"
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24, marginTop: -112 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* <Text className="text-3xl font-bold mb-8 text-center">로그인</Text> */}
+        <View className="flex-row items-center justify-center mb-20">
+          <Image source={require('../../assets/logo.png')} className="w-[172.8px] h-[104.6px]" />
+        </View>
 
       {/* 전화번호/이메일 입력창 */}
       <TextInput
@@ -231,10 +238,11 @@ export default function Login() {
         <View className="flex-1 h-px bg-gray-300" />
       </View>
 
-      {/* 회원가입 버튼 */}
-      <TouchableOpacity onPress={handleSignup} className="py-2">
-        <Text className="text-center text-[#222] font-medium">회원가입</Text>
-      </TouchableOpacity>
-    </View>
+        {/* 회원가입 버튼 */}
+        <TouchableOpacity onPress={handleSignup} className="py-2">
+          <Text className="text-center text-[#222] font-medium">회원가입</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

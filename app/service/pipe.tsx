@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Alert, Modal, TouchableWithoutFeedback, Keyboard, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Modal, TouchableWithoutFeedback, Keyboard, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import { addNotification } from '../notification/page';
@@ -97,7 +97,10 @@ export default function Pipe() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-8">
+      <KeyboardAvoidingView
+        className="flex-1 bg-white pt-8"
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
         {/* 상단 헤더 */}
         <View className="pt-12 flex-row items-center justify-between px-5 mb-3">
           <TouchableOpacity onPress={() => router.back()}>
@@ -158,7 +161,7 @@ export default function Pipe() {
             </View>
           </View>
         </Modal>
-      </View>
+      </KeyboardAvoidingView>
     </>
   );
 }
